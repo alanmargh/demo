@@ -1,0 +1,22 @@
+version: '2'
+services:
+    grum-cassandra:
+        image: cassandra:3.9
+        # volumes:
+        #     - ~/volumes/jhipster/grum/cassandra/:/var/lib/cassandra/data
+        ports:
+            - 7000:7000
+            - 7001:7001
+            - 7199:7199
+            - 9042:9042
+            - 9160:9160
+    grum-cassandra-node:
+        image: cassandra:3.9
+        environment:
+            - CASSANDRA_SEEDS=grum-cassandra
+    grum-cassandra-migration:
+        extends:
+            file: cassandra-migration.yml
+            service: grum-cassandra-migration
+        environment:
+            - CREATE_KEYSPACE_SCRIPT=create-keyspace-prod.cql
