@@ -1,0 +1,44 @@
+#-------------------------------------------------------------------------------
+# Note for using the rate-limiting:
+#   The comment part won't be copied if you use the subgenerator docker-compose
+#   you have to manually copy it
+#-------------------------------------------------------------------------------
+version: '2'
+services:
+    grum-app:
+        image: grum
+        environment:
+            - SPRING_PROFILES_ACTIVE=prod,swagger
+            - EUREKA_CLIENT_SERVICE-URL_DEFAULTZONE=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/eureka
+            - SPRING_CLOUD_CONFIG_URI=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/config
+            - SPRING_DATASOURCE_URL=jdbc:mysql://grum-mysql:3306/grum?useUnicode=true&characterEncoding=utf8&useSSL=false
+            - SPRING_DATA_CASSANDRA_CONTACTPOINTS=grum-cassandra
+            - JHIPSTER_SLEEP=30 # gives time for the Cassandra cluster to start and execute the migration scripts
+            - SPRING_DATA_ELASTICSEARCH_CLUSTER_NODES=grum-elasticsearch:9300
+        ports:
+            - 8080:8080
+    grum-mysql:
+        extends:
+            file: mysql.yml
+            service: grum-mysql
+    # Uncomment to have Cassandra working with the gateway
+    # grum-cassandra:
+    #     extends:
+    #         file: cassandra-cluster.yml
+    #         service: grum-cassandra
+    # grum-cassandra-migration:
+    #     extends:
+    #         file: cassandra-migration.yml
+    #         service: grum-cassandra-migration
+    #     environment:
+    #         - CREATE_KEYSPACE_SCRIPT=create-keyspace-prod.cql
+    grum-elasticsearch:
+        extends:
+            file: elasticsearch.yml
+            service: grum-elasticsearch
+    jhipster-registry:
+        extends:
+            file: jhipster-registry.yml
+            service: jhipster-registry
+        environment:
+            - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS=file:./central-config/docker-config/
